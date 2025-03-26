@@ -1,12 +1,28 @@
 pragma circom 2.1.9;
 
 include "miura.circom";
+include "commit.circom";
 
 template MainComponent(len) {
     signal input probe[len];
     signal input model[len];
+    signal input r_probe;
+    signal input r_model;
+
+    signal output C_probe;
+    signal output C_model;
     signal output miura_dividend;
     signal output miura_divisor;
+
+    component ComProbe = Commit(len);
+    ComProbe.in <== probe;
+    ComProbe.r <== r_probe;
+    C_probe <== ComProbe.out;
+
+    component ComModel = Commit(len);
+    ComModel.in <== model;
+    ComModel.r <== r_model;
+    C_model <== ComModel.out;
 
     component M = Miura_dividend_divisor(len);
     M.a <== probe;
@@ -15,4 +31,4 @@ template MainComponent(len) {
     miura_divisor <== M.divisor;
 }
 
-component main  = MainComponent(9000);
+component main  = MainComponent(16);
