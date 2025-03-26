@@ -1,0 +1,17 @@
+Usage: pattern_generator.py <vector_length> [N_test_cases]
+
+Produces a so-called test pattern for vectors of length `vector_length`.
+One model will be created and `N_test_cases` probes.
+If the `N_test_cases` parameter is not specified, `10` will be used as default value.
+
+Examples:
+    Output a test pattern with 10 probes of length 16 to stdout:
+    `pattern_generator.py 16`
+
+    Output a test pattern with 3 probes of length 16 to stdout:
+    `pattern_generator.py 16 3`
+
+    Write a test pattern to a file:
+    `pattern_generator.py 16 > myfile.json`
+
+Author: Konrad Klier <konrad.klier@epfl.ch>, Feb 2025

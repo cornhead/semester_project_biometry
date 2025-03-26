@@ -16,11 +16,9 @@ def usage() -> None:
     :returns: Termination with exit code 0
     '''
 
-    print("Usage: pattern_generator.py <vector_length> [N_test_cases]")
-    print()
-    print("Produces a so-called test pattern for vectors of length vector_length.")
-    print("One model will be created and N_test_cases probes.")
-    print("If the N_test_cases parameter is not specified, 10 will be used as default value.")
+    with open('usage.txt', 'r') as f:
+        print(f.read())
+
     sys.exit(0)
 
 def parse_cli_args(argv:list[str]) -> tuple[int, int]:
