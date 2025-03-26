@@ -116,7 +116,7 @@ async function test(file_path){
 
     }
 
-    console.log();
+    console.log(); // needed to go to next line after carriage return for progress indicator
 
     if (testcases_failed == 0){
         console.log(chalk.green("ALL TEST CASES PASSED"));
@@ -165,9 +165,8 @@ async function prove(file_path) {
 
     var res = await prove_internal(input_json);
 
-    console.log(res.publicSignals);
-    // console.log(chalk.green("Color Sequence: ") + color_sequence);
-    // console.log(chalk.green("Commitment: ") + commitment);
+    console.log(chalk.green("Public Signals: "), JSON.stringify(res.public_signals));
+    console.log(chalk.green("Proof: "), JSON.stringify(res.proof));
     console.log(chalk.green("Success"), "(Prover Time ", res.prover_time/1000, " sec.)");
     
     process.exit(0);
@@ -202,7 +201,7 @@ async function verify(proof_str, public_signals_str){
 
     if (res.accept) {
         console.log(chalk.green("Verification OK"), "(Verifier Time: ", res.verifier_time/1000," sec.)");
-        console.log(chalk.green("Miura Score: ") + publicSignals[0]/publicSignals[1]);
+        console.log(chalk.green("Miura Score: ") + public_signals[2]/public_signals[3]);
         process.exit(0);
     } else {
         console.log(chalk.red("Invalid proof"));
@@ -227,17 +226,12 @@ program
 
 program
     .command('test <file>')
-    .description('Takes the path to a file with test patterns and performs tests and benchmarkings')
+    .description('Takes the path to a JSON file with test patterns and performs tests and benchmarkings')
     .action((file) => test(file))
-
-// program
-//     .command('compute_proof <guess...>')
-//     .description('')
-//     .action((guess) => compute_proof(guess))
 
 program
     .command('verify <proof> <publicSignals>')
-    .description('takes a proof and public signals als stringified JSON objects and verifies the SNARK')
+    .description('takes a proof and public signals as stringified JSON objects and verifies the SNARK')
     .action((proof, publicSignals) => verify(proof, publicSignals))
 
 program
