@@ -1,5 +1,5 @@
 '''
-A generator for test patterns for the semester project on biometric finger vein recognition
+A generator for test patterns and random circuit input for the semester project on biometric finger vein recognition
 
 :moduleauthor: Konrad Klier <konrad.klier@epfl.ch>
 '''
@@ -25,8 +25,20 @@ def parse_cli_args(argv:list[str]) -> tuple[str, tuple]:
     '''
     Parses the command-line arguments
 
+    The returned tuple indicates the command that is to be executed
+    together with its arguments/parameters.
+
+    The possible values for the returned command string are:
+        - usage
+        - die
+        - test_pattern
+        - random_input
+
+    Note that the set of possible return values for the command differs
+    from the set of accepted input values for the command over the CLI.
+
     :param argv: Array of the command-line arguments(e.g. obtainend from `sys.argv()`)
-    :return: A tuple with `vector_length` and `n_test_cases`
+    :return: A tuple of a string-identifier of the command and a tuple of arguments
     '''
 
     argc = len(argv)
@@ -125,7 +137,14 @@ class Testpattern:
         return json.dumps(self.__dict__)
 
 class CircuitInput:
-    def __init__(self, n):
+    '''
+    This class is used to generate and represent input to the SNARK circuit.
+    This is somewhat different from a test case, as it also includes the randomness
+    for the commitment, but not the expected Miura score.
+
+    :param n: Vector length
+    '''
+    def __init__(self, n:int):
         pattern = Testpattern(n, 1)
 
         self.model = pattern.model
@@ -134,6 +153,11 @@ class CircuitInput:
         self.r_probe = CircuitInput._random_field_element()
 
     def _random_field_element():
+        '''
+        Generate a random element of the finite field over the BN128 elliptic curve.
+
+        :important: As this is only a Proof of Concept, we do not use "good" randomness. Do not use the `random` library in deployed cryptographic implementations!
+        '''
         bn128_p = 21888242871839275222246405745257275088548364400416034343698204186575808495617; # order of the bn128 curve
         return random.randrange(0, bn128_p)
 
