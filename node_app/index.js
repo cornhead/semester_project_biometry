@@ -50,7 +50,7 @@ async function load_testpattern_file(file_path){
 
 async function extract_testcase_from_testpattern(mypattern, i){
     var model = mypattern.model;
-    var probe = mypattern.patterns[i];
+    var probe = mypattern.probes[i];
     var miura = mypattern.miura[i];
 
     return {
@@ -64,7 +64,7 @@ async function test(file_path){
     const EPSILON = 0.000001;
 
     var pattern = await load_testpattern_file(file_path);
-    var len = pattern.patterns.length;
+    var len = pattern.probes.length;
 
     var testcases_failed = 0;
     var prover_times = [];
