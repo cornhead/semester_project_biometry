@@ -19,6 +19,3 @@ RUN npm install -g snarkjs@latest
 
 
 # ----------- My Own Edit starts here ---------
-
-WORKDIR /
-ENTRYPOINT bash
