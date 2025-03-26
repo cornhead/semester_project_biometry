@@ -50,45 +50,44 @@ async function load_testpattern_file(file_path){
 
 async function extract_testcase_from_testpattern(mypattern, i){
     var model = mypattern.model;
-    var pattern = mypattern.patterns[i];
+    var probe = mypattern.patterns[i];
     var miura = mypattern.miura[i];
 
     return {
         "model" : model,
-        "pattern" : pattern,
+        "probe" : probe,
         "miura" : miura
     };
 }
 
-async function init_game(){
-    var pattern = await load_testpattern_file("../pattern_generation/patterns1.json");
+async function test(file_path){
+    var pattern = await load_testpattern_file(file_path);
     var testcase = await extract_testcase_from_testpattern(pattern, 3);
 
+    var r_model = Math.floor(Math.random() * max_r);
+    var r_probe = Math.floor(Math.random() * max_r);
 
+    var input_json = {
+        "model": testcase.model,
+        "probe": testcase.probe,
+        "r_model": r_model,
+        "r_probe" : r_probe
+    };
+    console.log(input_json);
+
+    var res = await prove_internal(input_json);
+
+    console.log(res);
+
+    process.exit(0);
+}
+
+async function prove_internal(input_json){
     var zkey_file = await storage.getItem('zkey_file');
     if (zkey_file == undefined){
         console.log(chalk.red("Error:") + "You first have to set a zkey file.");
         process.exit(1);
     }
-
-    // Sample a random element `r` from Z_q (q = `max_r`)
-    // ------------------------------------
-    var r_model = Math.floor(Math.random() * max_r);
-    var r_pattern = Math.floor(Math.random() * max_r);
-
-    // Compute a dummy proof on input
-    //     in_guess = [1, 1, 1, 1, ...]
-    //     in_solution = color_sequence
-    //     in_r = r
-    // --------------------------------
-
-
-    var input_json = {
-        "model": testcase.model,
-        "probe": testcase.pattern,
-        "r_model": r_model,
-        "r_probe" : r_pattern
-    };
 
     const t0 = performance.now(); // https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
     const { proof, publicSignals } = await snarkjs.groth16.fullProve( input_json, wasm_file, zkey_file);
@@ -98,14 +97,28 @@ async function init_game(){
     // Read the commitment from the public signals generated together with the proof
     // -----------------------------------------------------------------------------
 
-    console.log(publicSignals);
 
     var commitment = publicSignals[0];
 
+    // process.exit(0);
+    return {
+        "proof" : proof,
+        "public_signals" : publicSignals,
+        "prover_time" : prover_time
+    };
+}
+
+async function prove(file_path) {
+    var f = fs.readFileSync(file_path, 'utf8');
+    var input_json = JSON.parse(f);
+
+    var res = await prove_internal(input_json);
+
+    console.log(res.publicSignals);
     // console.log(chalk.green("Color Sequence: ") + color_sequence);
     // console.log(chalk.green("Commitment: ") + commitment);
-    console.log(chalk.green("Success"), "(Prover Time ", prover_time/1000, " sec.)");
-
+    console.log(chalk.green("Success"), "(Prover Time ", res.prover_time/1000, " sec.)");
+    
     process.exit(0);
 }
 
@@ -125,13 +138,14 @@ async function verify(proof_str, public_signals_str){
     // Verify the proof using `vKey`, `publicSignals` and `proof`
     // ----------------------------------------------------------
     
+    const t0 = performance.now();
     const res = await snarkjs.groth16.verify(vKey, publicSignals, proof);
+    const t1 = performance.now();
+    const verifier_time = t1-t0;
 
     if (res === true) {
-        console.log(chalk.green("Verification OK"));
-        console.log(chalk.green("Number of correct positions: ") + publicSignals[1]);
-        console.log(chalk.green("Commitment: ") + publicSignals[0]);
-        console.log(chalk.yellow("(Don't forget to check that the commitment didn't change.)"));
+        console.log(chalk.green("Verification OK"), "(Verifier Time: ", verifier_time," sec.)");
+        console.log(chalk.green("Miura Score: ") + publicSignals[0]/publicSignals[1]);
         process.exit(0);
     } else {
         console.log(chalk.red("Invalid proof"));
@@ -151,14 +165,19 @@ program
     .action((file) => set_vkey_file(file))
 
 program
-    .command('init')
-    .description('Initializes the game by setting the random color sequence and committing to it.')
-    .action(() => init_game())
+    .command('prove <file>')
+    .description('Takes a JSON file with the input parameters to the circuit, computes the output of the circuit and provides a proof of correctness')
+    .action((input) => prove(input))
 
 program
-    .command('compute_proof <guess...>')
-    .description('')
-    .action((guess) => compute_proof(guess))
+    .command('test <file>')
+    .description('Takes the path to a file with test patterns and performs tests and benchmarkings')
+    .action((file) => test(file))
+
+// program
+//     .command('compute_proof <guess...>')
+//     .description('')
+//     .action((guess) => compute_proof(guess))
 
 program
     .command('verify <proof> <publicSignals>')
