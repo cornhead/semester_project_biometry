@@ -37,9 +37,9 @@ def parse_cli_args(argv:list[str]) -> tuple[str, tuple]:
     command_str = argv[1]
 
     match command_str:
-        case "pattern":
+        case "test_pattern":
             if argc < 3 or argc > 4:
-                return ("die", (f"Error: The command \"pattern\" takes 1 or 2 arguments, {argc-2} given."))
+                return ("die", (f"Error: The command \"test_pattern\" takes 1 or 2 arguments, {argc-2} given."))
 
             try:
                 vector_length = int(argv[2])
@@ -54,7 +54,18 @@ def parse_cli_args(argv:list[str]) -> tuple[str, tuple]:
             else:
                 n_test_cases = 10
 
-            return ("pattern", (vector_length, n_test_cases))
+            return ("test_pattern", (vector_length, n_test_cases))
+
+        case "random_input":
+            if argc != 3:
+                return ("die", (f"Error: The command \"random_input\" takes 1 argument, {argc-2} given."))
+
+            try:
+                vector_length = int(argv[2])
+            except ValueError:
+                return ("die", ("Error: Argument vector_length needs to be an integer"))
+
+            return ("random_input", (vector_length))
 
         case "help":
             return("usage", ())
@@ -110,14 +121,24 @@ class Testpattern:
         dot = lambda a, b: sum(map(mul, a, b))
         return dot(a,b)/(dot(a,a) + dot(b,b))
 
-    def toJSON(self):
-        '''
-        Turns an instance of the class into a JSON string
-        '''
+    def __str__(self):
         return json.dumps(self.__dict__)
 
+class CircuitInput:
+    def __init__(self, n):
+        pattern = Testpattern(n, 1)
+
+        self.model = pattern.model
+        self.probe = pattern.probes[0]
+        self.r_model = CircuitInput._random_field_element()
+        self.r_probe = CircuitInput._random_field_element()
+
+    def _random_field_element():
+        bn128_p = 21888242871839275222246405745257275088548364400416034343698204186575808495617; # order of the bn128 curve
+        return random.randrange(0, bn128_p)
+
     def __str__(self):
-        return self.toJSON()
+        return json.dumps(self.__dict__)
 
 if __name__ == '__main__':
     (command, args) = parse_cli_args(sys.argv)
@@ -127,6 +148,18 @@ if __name__ == '__main__':
             usage()
         case "die":
             print(args, file=sys.stderr)
-        case "pattern":
+            sys.exit(1)
+        case "test_pattern":
             testcase = Testpattern(*args)
             print(testcase)
+        case "random_input":
+            myinput = CircuitInput(args)
+            print(myinput)
+
+        case _:
+            print(
+                "Ooops, this should not happen.\n"
+                "The program tried to call an unimplemented command.\n"
+                "Please contact the author." \
+            , file=sys.stderr)
+            sys.exit(1)
