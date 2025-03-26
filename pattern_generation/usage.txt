@@ -1,0 +1,31 @@
+Usage: pattern_generator.py <command> [args...]
+
+**Commands**:
+    test_pattern <vector_length> [n_test_cases]
+        Produces a so-called test pattern  in JSON format for
+        vectors of length `vector_length`. One model will be
+        created and `N_test_cases` probes. If the `N_test_cases`
+        parameter is not specified, `10` will be used as default value.
+
+    random_input <vector_length>
+        Produes a JSON representation of suitable input to the
+        SNARK circuit. That is, it includes one model, one probe
+        and the randomness for the commitments.
+
+    help
+        Print this message
+
+**Examples**:
+    Output a test pattern with 10 probes of length 16 to stdout:
+    `pattern_generator.py test_pattern 16`
+
+    Output a test pattern with 3 probes of length 16 to stdout:
+    `pattern_generator.py test_pattern 16 3`
+
+    Write a test pattern to a file:
+    `pattern_generator.py test_pattern 16 > myfile.json`
+
+    Write a random input to a file:
+    `pattern_generator.py random_input 16 > input.json`
+
+Author: Konrad Klier <konrad.klier@epfl.ch>, Feb 2025
