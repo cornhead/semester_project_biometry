@@ -175,5 +175,5 @@ cython_debug/
 
 # OWN IGNORES -------------------------
 
-.r1cs
-.wasm
+*.r1cs
+*.wasm
