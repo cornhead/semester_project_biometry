@@ -1,19 +1,54 @@
+DIR = ./build
+CFLAGS = --O1
+N = 16
+
+.PHONY:all
+all: build/verification_key.json
+
 .PHONY:clean
 clean:
-	rm -f circuit_0000.zkey circuit_0001.zkey circuit_0002.zkey challenge_phase2_0003 response_phase2_0003 circuit_0003.zkey
+	rm -rf build/
 
-main.r1cs main.wasm: main.circom
-	circom --r1cs --wasm $<
+.PHONY:help
+help:
+	@echo "Available Targets:"
+	@echo "  * all"
+	@echo "  * clean"
+	@echo "  * compile"
+	@echo "  * setup"
+	@echo "  * extract_vkey"
+	@echo "  * targets"
+	@echo ""
+	@echo "Available Variables:"
+	@echo "  * DIR    ... output directory, default: ./build"
+	@echo "  * CFLAGS ... compiler flags, default: --O1"
+	@echo "  * N      ... vector length, default: 16"
 
-circuit_final.zkey: main.r1cs powersOfTau28_hez_final_23.ptau
-	snarkjs groth16 setup $< $2 circuit_0000.zkey
-	snarkjs zkey contribute circuit_0000.zkey circuit_0001.zkey --name="1st Contributor Name" -v
-	snarkjs zkey contribute circuit_0001.zkey circuit_0002.zkey --name="Second contribution Name" -v -e="Another random entropy"
-	snarkjs zkey export bellman circuit_0002.zkey  challenge_phase2_0003
-	snarkjs zkey bellman contribute bn128 challenge_phase2_0003 response_phase2_0003 -e="some random text"
-	snarkjs zkey import bellman circuit_0002.zkey response_phase2_0003 circuit_0003.zkey -n="Third contribution name"
-	snarkjs zkey beacon circuit_0003.zkey $@ 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10 -n="Final Beacon phase2"
-	rm circuit_0001.zkey circuit_0002.zkey challenge_phase2_0003 response_phase2_0003 circuit_0003.zkey
 
-verification_key.json: circuit_final.zkey
+.PHONY:compile
+compile: ${DIR}/main.r1cs
+
+${DIR}/main.r1cs: main.circom
+	mkdir -p ${DIR}
+	head -n -1 main.circom > .tmp.main_${N}.circom
+	@echo "component main  = MainComponent(${N});" >> .tmp.main_${N}.circom
+	circom --r1cs --wasm --sym -o ${DIR} ${CFLAGS} .tmp.main_${N}.circom
+	rm .tmp.main_${N}.circom
+	mv ${DIR}/.tmp.main_${N}.r1cs ${DIR}/main.r1cs
+	mv ${DIR}/.tmp.main_${N}.sym ${DIR}/main.sym
+	mv ${DIR}/.tmp.main_${N}_js/.tmp.main_${N}.wasm ${DIR}/.tmp.main_${N}_js/main.wasm
+	mv ${DIR}/.tmp.main_${N}_js ${DIR}/main_js
+
+.PHONY:setup
+setup: ${DIR}/circuit_final.zkey
+
+${DIR}/circuit_final.zkey: ${DIR}/main.r1cs powersOfTau28_hez_final_23.ptau
+	snarkjs groth16 setup $^ ${DIR}/circuit_0000.zkey
+	snarkjs zkey contribute ${DIR}/circuit_0000.zkey ${DIR}/circuit_0001.zkey --name="Contribution Name" -v -e="Another random entropy"
+	snarkjs zkey beacon ${DIR}/circuit_0001.zkey $@ 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10 -n="Final Beacon phase2"
+
+.PHONY:extract_vkey
+extract_vkey: ${DIR}/verification_key.json
+
+${DIR}/verification_key.json: ${DIR}/circuit_final.zkey
 	snarkjs zkey export verificationkey $< $@
