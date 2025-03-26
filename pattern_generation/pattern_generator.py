@@ -21,7 +21,7 @@ def usage() -> None:
 
     sys.exit(0)
 
-def parse_cli_args(argv:list[str]) -> tuple[int, int]:
+def parse_cli_args(argv:list[str]) -> tuple[str, tuple]:
     '''
     Parses the command-line arguments
 
@@ -31,25 +31,36 @@ def parse_cli_args(argv:list[str]) -> tuple[int, int]:
 
     argc = len(argv)
 
-    if argc < 2 or argc > 3:
-        usage()
+    if argc < 2:
+        return("usage", ())
 
-    try:
-        vector_length = int(argv[1])
-    except ValueError:
-        print("Error: Argument vector_length needs to be an integer\n")
-        usage()
+    command_str = argv[1]
 
-    if argc == 3:
-        try:
-            n_test_cases = int(argv[2])
-        except ValueError:
-            print("Error: If N_test_cases is spedified, it needs to be an integer, otherwise, 10 will be used as default value.\n")
-            usage()
-    else:
-        n_test_cases = 10
+    match command_str:
+        case "pattern":
+            if argc < 3 or argc > 4:
+                return ("die", (f"Error: The command \"pattern\" takes 1 or 2 arguments, {argc-2} given."))
 
-    return (vector_length, n_test_cases)
+            try:
+                vector_length = int(argv[2])
+            except ValueError:
+                return ("die", ("Error: Argument vector_length needs to be an integer"))
+
+            if argc == 4:
+                try:
+                    n_test_cases = int(argv[3])
+                except ValueError:
+                    return ("die", ("Error: If N_test_cases is spedified, it needs to be an integer, otherwise, 10 will be used as default value."))
+            else:
+                n_test_cases = 10
+
+            return ("pattern", (vector_length, n_test_cases))
+
+        case "help":
+            return("usage", ())
+
+        case _:
+            return ("die", ("Error: unrecognized command \"" + command_str + "\""))
 
 
 class Testpattern:
@@ -109,6 +120,13 @@ class Testpattern:
         return self.toJSON()
 
 if __name__ == '__main__':
-    (vector_length, n_test_cases) = parse_cli_args(sys.argv)
-    testcase = Testpattern(vector_length, n_test_cases)
-    print(testcase)
+    (command, args) = parse_cli_args(sys.argv)
+
+    match command:
+        case "usage":
+            usage()
+        case "die":
+            print(args, file=sys.stderr)
+        case "pattern":
+            testcase = Testpattern(*args)
+            print(testcase)
