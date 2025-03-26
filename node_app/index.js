@@ -61,25 +61,76 @@ async function extract_testcase_from_testpattern(mypattern, i){
 }
 
 async function test(file_path){
+    const EPSILON = 0.000001;
+
     var pattern = await load_testpattern_file(file_path);
-    var testcase = await extract_testcase_from_testpattern(pattern, 3);
+    var len = pattern.patterns.length;
 
-    var r_model = Math.floor(Math.random() * max_r);
-    var r_probe = Math.floor(Math.random() * max_r);
+    var testcases_failed = 0;
+    var prover_times = [];
+    var verifier_times = [];
+    
+    for (var i = 0; i < len; i += 1){
+        process.stdout.write("Running test case " + (i+1) + "/" + len + "...\r");
 
-    var input_json = {
-        "model": testcase.model,
-        "probe": testcase.probe,
-        "r_model": r_model,
-        "r_probe" : r_probe
-    };
-    console.log(input_json);
+        var testcase = await extract_testcase_from_testpattern(pattern, i);
 
-    var res = await prove_internal(input_json);
+        var r_model = Math.floor(Math.random() * max_r);
+        var r_probe = Math.floor(Math.random() * max_r);
 
-    console.log(res);
+        var input_json = {
+            "model": testcase.model,
+            "probe": testcase.probe,
+            "r_model": r_model,
+            "r_probe" : r_probe
+        };
 
-    process.exit(0);
+        var resP = await prove_internal(input_json);
+        prover_times.push(resP.prover_time);
+
+        var num = resP.public_signals[2];
+        var den = resP.public_signals[3];
+        var miura = num/den;
+
+        if (Math.abs(miura-testcase.miura) > EPSILON) {
+            testcases_failed += 1;
+
+            console.log(chalk.red("Testcase Failed: "));
+            console.log("\tTest case ", (i+1), "/", len, " failed because the Miura score was incorrect.");
+            console.log("\tExpected ", testcase.miura, ", got ", num, "/", den, "=", miura);
+
+            continue;
+        }
+
+
+        var resV = await verify_internal(resP.proof, resP.public_signals);
+        verifier_times.push(resV.verifier_time);
+
+        if (!resV.accept){
+            console.log(chalk.red("FATAL ERROR:"));
+            console.log("\tTest case ", (i+1), "/", len, " failed because the verifier did not accept the proof by the prover.");
+            console.log("\t", resP.proof);
+
+            process.exit(1);
+        }
+
+    }
+
+    console.log();
+
+    if (testcases_failed == 0){
+        console.log(chalk.green("ALL TEST CASES PASSED"));
+        
+        var avg_prover_time = prover_times.reduce( (a,b) => a+b, 0) / len;
+        var avg_verifier_time = verifier_times.reduce( (a,b) => a+b, 0) / len;
+        console.log("Avg. prover time:   ", avg_prover_time, "ms");
+        console.log("Avg. verifier time: ", avg_verifier_time, "ms");
+    }
+    else {
+        console.log(chalk.red(testcases_failed, "/", len, " TEST CASES FAILED"));
+    }
+
+    process.exit( testcases_failed == 0 ? 1 : 0 );
 }
 
 async function prove_internal(input_json){
@@ -122,36 +173,41 @@ async function prove(file_path) {
     process.exit(0);
 }
 
-async function verify(proof_str, public_signals_str){
+async function verify_internal(proof, public_signals) {
     var vkey_file = await storage.getItem('vkey_file');
     if (vkey_file == undefined){
         console.log(chalk.red("Error: ") + "You first have to set a vkey file.");
         process.exit(1);
     }
 
-    var proof = JSON.parse(proof_str);
-    var publicSignals = JSON.parse(public_signals_str);
-
     var vkey_path = await storage.getItem("vkey_file");
     const vKey = JSON.parse(fs.readFileSync(vkey_path));
 
-    // Verify the proof using `vKey`, `publicSignals` and `proof`
-    // ----------------------------------------------------------
-    
     const t0 = performance.now();
-    const res = await snarkjs.groth16.verify(vKey, publicSignals, proof);
+    const res = await snarkjs.groth16.verify(vKey, public_signals, proof);
     const t1 = performance.now();
     const verifier_time = t1-t0;
 
-    if (res === true) {
-        console.log(chalk.green("Verification OK"), "(Verifier Time: ", verifier_time," sec.)");
+    return {
+        "accept" : (res === true),
+        "verifier_time" : verifier_time
+    };
+}
+
+async function verify(proof_str, public_signals_str){
+    var proof = JSON.parse(proof_str);
+    var public_signals = JSON.parse(public_signals_str);
+
+    var res = await verify_internal(proof, public_signals);
+
+    if (res.accept) {
+        console.log(chalk.green("Verification OK"), "(Verifier Time: ", res.verifier_time/1000," sec.)");
         console.log(chalk.green("Miura Score: ") + publicSignals[0]/publicSignals[1]);
         process.exit(0);
     } else {
         console.log(chalk.red("Invalid proof"));
         process.exit(1);
     }
-
 }
 
 program
