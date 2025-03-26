@@ -152,12 +152,12 @@ def main():
 
     benchmarks = []
 
-    for i in range(4, 6):
+    for i in range(4, 14):
         n = 2**i
         for opt in ['--O1', '--O2']:
             eprint(f'Benchmarking for size {n} with {opt}...\r', end='')
             res = benchmark_with_params(n, opt)
-            print(';'.join([str(val) for val in line]))
+            print(';'.join([str(val) for val in res]))
             benchmarks += res
 
 if __name__=='__main__':

@@ -14,12 +14,12 @@ template MainComponent(len) {
     signal output miura_dividend;
     signal output miura_divisor;
 
-    component ComProbe = Commit(len);
+    component ComProbe = CommitToBits(len);
     ComProbe.in <== probe;
     ComProbe.r <== r_probe;
     C_probe <== ComProbe.out;
 
-    component ComModel = Commit(len);
+    component ComModel = CommitToBits(len);
     ComModel.in <== model;
     ComModel.r <== r_model;
     C_model <== ComModel.out;
