@@ -169,3 +169,24 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+
+
+# OWN IGNORES -------------------------
+
+*.r1cs
+*.wasm
+*.json
+*.zkey
+*.sym
+**/main_c*/*
+**/main_js/*
+**/powersOfTau*
+**/verification_key.json
+**/patterns1.sjon
+**/node_modules/*
+**/.node-persist/*
+**.tmp.*
+**/core
+**/node_app/docs/*

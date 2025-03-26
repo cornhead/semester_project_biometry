@@ -8,3 +8,14 @@ services:
         target: /circom_snarkjs_workdir
     stdin_open: true
     tty: true
+    working_dir: /circom_snarkjs_workdir
+
+  compile:
+    image: circom_snarkjs:1.0.1
+    build: .
+    volumes:
+      - type: bind
+        source: ./circom_snarkjs_workdir
+        target: /circom_snarkjs_workdir
+    working_dir: /circom_snarkjs_workdir
+    command: ["/bin/sh", "-c", "make clean && make all N=$$N CFLAGS=$$CFLAGS"]
