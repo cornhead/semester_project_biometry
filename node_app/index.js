@@ -14,7 +14,8 @@ import fs from 'fs';
 
 const max_r = 21888242871839275222246405745257275088548364400416034343698204186575808495617; // order of the bn128 curve
 
-const wasm_file = "../circom_snarkjs_workdir/main_js/main.wasm";
+// computes absolute to main.wasm so that it doesn't depend on where it's called from
+const wasm_file = import.meta.dirname + "/../circom_snarkjs_workdir/build/main_js/main.wasm";
 
 storage.initSync();
 
