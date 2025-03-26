@@ -177,3 +177,13 @@ cython_debug/
 
 *.r1cs
 *.wasm
+*.json
+*.zkey
+*.sym
+*/main_c*/*
+*/main_js/*
+*/powersOfTau*
+*/verification_key.json
+*/patterns1.sjon
+*/node_modules/*
+*/.node-persist/*
