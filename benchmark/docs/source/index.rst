@@ -23,3 +23,7 @@ API Documentation
 .. automodule:: benchmark
    :members:
    :private-members:
+
+.. automodule:: csv_to_tabular
+   :members:
+   :private-members:
