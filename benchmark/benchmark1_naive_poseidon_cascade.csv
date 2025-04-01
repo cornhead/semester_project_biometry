@@ -1,4 +1,4 @@
-vector length;optimization;lin. constr.;non-lin. constr.;P time; V time
+vector length;optimization;lin. constr.;non-lin. constr.;P time;V time
 16;--O1;8769;7824;2591.3283281;21.986389699999698
 16;--O2;0;7728;1585.5795218;26.524081699999783
 32;--O1;17537;15648;4932.0203513;23.50202839999929

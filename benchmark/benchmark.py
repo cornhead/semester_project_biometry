@@ -146,7 +146,7 @@ def main():
         are available. The output is in CSV format.
     '''
 
-    print('vector length;optimization;lin. constr.;non-lin. constr.;P time; V time')
+    print('vector length;optimization;lin. constr.;non-lin. constr.;P time;V time')
 
     set_key_files()
 
