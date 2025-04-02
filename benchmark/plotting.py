@@ -50,7 +50,14 @@ def eprint(*args, **kwargs):
     '''
     print(*args, file=sys.stderr, **kwargs)
 
-def usage():
+def die(*args, **kwargs):
+    eprint(*args, **kwargs)
+    sys.exit(1)
+
+def usage(*args, **kwargs):
+    if len(*args) > 0:
+        eprint(*args)
+
     eprint(f'Usage: {sys.argv[0]} [Options] <plot decription file>')
     eprint()
     eprint('Options:')
@@ -80,8 +87,7 @@ def usage():
 
 def look_up_cli_argument(arg) -> str:
     if arg not in OPTIONS_DICT.keys():
-        eprint(f'Unable to parse option "{arg}"')
-        usage()
+        usage(f'Unable to parse option "{arg}"')
 
     opt = OPTIONS_DICT[arg]
 
@@ -104,14 +110,12 @@ def parse_cli_arguments(argv) -> dict:
 
     if first_input_idx < 0:
         if l < 2:
-            eprint('No input files specified.')
-            usage()
+            usage('No input files specified.')
         else:
             first_input_idx = 1
 
     if first_input_idx >= l:
-        eprint('No input files specified.')
-        usage()
+        usage('No input files specified.')
 
     # ------- parse options --------
 
@@ -133,77 +137,101 @@ def parse_cli_arguments(argv) -> dict:
     # --------- parse input files -----
 
     if first_input_idx != l-1:
-        eprint(f'Expected exactly one iput file, got {l-first_input_idx}.')
-        usage()
+        usage(f'Expected exactly one iput file, got {l-first_input_idx}.')
 
     config['input_file'] = argv[first_input_idx]
 
     return config
 
 def check_yaml(yml:dict):
-    print(yml)
+    # print(yml)
 
-def draw_plot(data:pd.DataFrame, metadata:dict[str], plot_function:str):
-    y_col = ('cycles' if plot_function == 'cylces' else 'P(n)')
+    if 'plot_options' not in yml or 'input_files' not in yml:
+        eprint('The input yml file must contain at least the following entries:')
+        eprint('\tplot_options')
+        eprint('\tinput_files')
+        sys.exit(1)
+
+    if not isinstance(yml['plot_options'], dict):
+        die('Error in input yml file: "plot_options" must be a dictionary')
+
+    if not isinstance(yml['input_files'], list):
+        die('Error in input yml file: "input_files" must be a list')
+
+    for in_f in yml['input_files']:
+        if not isinstance(in_f, dict):
+            die('Error in input yml file: each "input_files" entry must be a dict')
+
+        required_fields = ['description', 'path', 'column']
+
+        for rf in required_fields:
+            if rf not in in_f.keys():
+                die(f'Error in input yml file: One of the "input_files" entries is missing the required "{rf}" field')
+
+
+def draw_plot(df:pd.DataFrame, column_to_plot:str, description:str, **kwargs):
+
     ax = sns.lineplot(
-        data=data,
-        x='n',
-        y=y_col,
-        estimator='median',
-        **metadata['plot_kwargs']
+        data=df,
+        x='vector length',
+        y=column_to_plot,
+        errorbar=None,
+        **kwargs
     )
 
-    ax.text(data['n'].max(), data[y_col].iloc[-1], metadata['tag'], **metadata['tag_kwargs'])
+    ax.text(df['vector length'].max(), df[column_to_plot].iloc[-1], description)
 
 if __name__ == '__main__':
     config = parse_cli_arguments(sys.argv)
     if 'help' in config:
         usage()
 
-    print(config)
+    # print(config)
 
 
     try:
         with open(config['input_file']) as f:
             yml = yaml.safe_load(f)
     except FileNotFoundError:
-        eprint(f'Unable to open file "{config["input_file"]}"')
-        sys.exit(1)
+        die(f'Unable to open file "{config["input_file"]}"')
 
     check_yaml(yml)
 
+    plt_opts = yml['plot_options']
+
+    plt.figure(figsize=(10, 5))
+    ax = plt.axes()
+    ax.set_facecolor((0.9, 0.9, 0.9))
+    plt.grid(visible=True, which="major", ls="-", color="white", axis='y', lw=1)
+    plt.title(plt_opts['title'], loc='left', fontdict=plt_opts['font_title'])
+    plt.xlabel(plt_opts['x_label'], fontdict=plt_opts['font_axis'])
+    ax.ticklabel_format(style='plain')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
 
 
-    # title = "Performance [Ops/Cycle]" if config['plot function'] == 'performance' else 'Execution Time [Cycles]'
-    # x_label = "Image Size [Pixels]"
+    for in_f in yml['input_files']:
+        desc = in_f['description']
+        path = in_f['path']
+        column = in_f['column']
 
-    # font_title = {
-    #     'weight': 'bold',
-    #     'size': 14
-    # }
+        del in_f['description']
+        del in_f['path']
+        del in_f['column']
 
-    # font_axis = {
-    #     'family': 'serif',
-    #     'size': 11
-    # }
+        df = pd.read_csv(path, sep=';')
 
-    # plt.figure(figsize=(10, 5))
-    # ax = plt.axes()
-    # ax.set_facecolor((0.9, 0.9, 0.9))
-    # plt.grid(visible=True, which="major", ls="-", color="white", axis='y', lw=1)
-    # plt.title(title, loc='left', fontdict=font_title)
-    # plt.xlabel(x_label, fontdict=font_axis)
-    # ax.ticklabel_format(style='plain')
-    # ax.spines['top'].set_visible(False)
-    # ax.spines['right'].set_visible(False)
+        if 'only_O2' in config.keys():
+            df = df[ df['optimization'] == '--O2' ]
 
+        if 'y_scaling' in plt_opts:
+            df[column] *= plt_opts['y_scaling']
 
-    # for (md, d) in data:
-    #     draw_plot(data=d, metadata=md, plot_function=config['plot function'])
+        draw_plot(df, column_to_plot=column, description=desc, **in_f)
 
-    # plt.ylabel('')
+    plt.ylabel('')
 
-    # if 'output file' in config:
-    #     plt.savefig(config['output file'], orientation='landscape',  dpi=300)
-    # else:
-    #     plt.show()
+    if 'output_file' in config.keys():
+        plt.savefig(config['output_file'], orientation='landscape',  dpi=500)
+    else:
+        plt.show()

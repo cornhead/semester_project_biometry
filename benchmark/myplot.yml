@@ -1,7 +1,23 @@
 plot_options:
-  title: "This is my plot"
+  title: "Prover Time [ms]"
+  x_label: "Image Size/Vector Length [Pixels]"
+  y_scaling: 0.001
+
+  font_title:
+    weight: 'bold'
+    size: 14
+
+  font_axis:
+    family: 'serif'
+    size: 11
 
 input_files:
   - description: "Data Trace 1"
     path: "benchmark1_naive_poseidon_cascade.csv"
     column: "P time"
+    marker: 'X'
+
+  - description: "Data Trace 2"
+    path: "benchmark2_bit_packing.csv"
+    column: "P time"
+    marker: 'o' 
