@@ -1,0 +1,7 @@
+plot_options:
+  title: "This is my plot"
+
+input_files:
+  - description: "Data Trace 1"
+    path: "benchmark1_naive_poseidon_cascade.csv"
+    column: "P time"
