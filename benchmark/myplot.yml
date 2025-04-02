@@ -1,5 +1,5 @@
 plot_options:
-  title: "Prover Time [ms]"
+  title: "Prover Time [s]"
   x_label: "Image Size/Vector Length [Pixels]"
   y_scaling: 0.001
 
@@ -20,4 +20,9 @@ input_files:
   - description: "Data Trace 2"
     path: "benchmark2_bit_packing.csv"
     column: "P time"
-    marker: 'o' 
+    marker: 'o'
+
+  - description: "Data Trace 3"
+    path: "benchmark3_fewer_hashes.csv"
+    column: "P time"
+    marker: "^"

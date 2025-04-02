@@ -7,7 +7,7 @@ template LongPoseidon(len) {
     signal input inputs[len];
     signal output out;
 
-    if (len <= 2){
+    if (len <= 16){
         component H = Poseidon(len);
         for (var i = 0; i < len; i += 1){
             H.inputs[i] <== inputs[i];
@@ -15,15 +15,16 @@ template LongPoseidon(len) {
         out <== H.out;
     }
     else {
-        component H = Poseidon(2);
-        H.inputs[0] <== inputs[len-1];
-        H.inputs[1] <== inputs[len-2];
+        component H = Poseidon(16);
+        for (var i = 0; i < 16; i += 1){
+            H.inputs[i] <== inputs[len-i-1];
+        }
 
-        component LH = LongPoseidon(len-1);
-        for (var i = 0; i < len-2; i += 1){
+        component LH = LongPoseidon(len-15);
+        for (var i = 0; i < len-16; i += 1){
            LH.inputs[i] <== inputs[i]; 
         }
-        LH.inputs[len-2] <== H.out;
+        LH.inputs[len-16] <== H.out;
 
         out <== LH.out;
     }
