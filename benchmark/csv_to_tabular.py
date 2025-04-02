@@ -12,7 +12,7 @@ REQUIRED_CSV_HEADERS = [
 
 def eprint(*args, **kwargs):
     '''
-    Print an error message to stderr. (Simple wrapper around print())
+    Print an error message to stderr. (Simple wrapper around `print()`)
     '''
     print(*args, file=sys.stderr, **kwargs)
 
@@ -33,11 +33,14 @@ def usage():
     eprint(f'the code from the benchmarking.')
     sys.exit(1)
 
-def parse_cli_params(argv):
+def parse_cli_params(argv:list[str]) -> str:
     '''
     Takes the script arguments (argv) and parses them.
     Exactly one argument is expected, which is interpreted as filename.
     On error, the function prints the usage message and terminates execution.
+
+    :param argv: The CLI arguments as obtained by e.g. `sys.argv()`
+    :returns: the filename as specified in the parameters or termination on failure
     '''
 
     if len(argv) != 2:
@@ -52,6 +55,9 @@ def check_df_header(df:pd.DataFrame):
     '''
     Takes a pandas data frame and checks that it contains all required headers.
     Otherwise, the function prints the usage message and terminates execution.
+
+    :param df: a pandas data frame
+    :returns: None. Termination on failure
     '''
 
     headers = df.columns.values.tolist()
@@ -61,10 +67,13 @@ def check_df_header(df:pd.DataFrame):
             eprint(f'Couldn\'t find required header "{req}" in headers of provided CSV file.')
             usage()
 
-def df_to_tabular(df:pd.DataFrame):
+def df_to_tabular(df:pd.DataFrame) -> str:
     '''
-    Takes a pandas data frame that contains all required headers (cf. `REQUIRED_HEADERS`)
+    Takes a pandas data frame that contains all required headers (cf. `REQUIRED_CSV_HEADERS`)
     and compiles the data to a LaTeX tabular.
+
+    :param df: a pandas data frame
+    :returns: The compiled LaTeX code as string or termination on failure
     '''
 
     mystr = ''
