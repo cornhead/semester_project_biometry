@@ -206,6 +206,7 @@ if __name__ == '__main__':
     plt.title(plt_opts['title'], loc='left', fontdict=plt_opts['font_title'])
     plt.xlabel(plt_opts['x_label'], fontdict=plt_opts['font_axis'])
     ax.ticklabel_format(style='plain')
+    ax.set_xticks( [2**x for x in [5] + list(range(10,16))])
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
 

@@ -12,17 +12,17 @@ plot_options:
     size: 11
 
 input_files:
-  - description: "Data Trace 1"
+  - description: "Base Implementation"
     path: "benchmark1_naive_poseidon_cascade.csv"
     column: "P time"
     marker: 'X'
 
-  - description: "Data Trace 2"
+  - description: "Optimization 1"
     path: "benchmark2_bit_packing.csv"
     column: "P time"
     marker: 'o'
 
-  - description: "Data Trace 3"
+  - description: "Optimization 2"
     path: "benchmark3_fewer_hashes.csv"
     column: "P time"
     marker: "^"
