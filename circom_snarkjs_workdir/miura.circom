@@ -4,10 +4,8 @@ include "inner_product.circom";
 
 
 /*
-@brief:
-    computes the (non-binary) Miura metric of the two given inputs a,b and outputs the result as dividend and divisor
-@detail:
-    The inputs are of size len.
+    @brief: computes the (non-binary) Miura metric of the two given inputs a,b and outputs the result as dividend and divisor
+    @detail: The inputs are of size len.
 */
 template Miura_dividend_divisor(len) {
     signal input a[len];
@@ -30,6 +28,46 @@ template Miura_dividend_divisor(len) {
 
     dividend <== ab.out;
     divisor <== aa.out+ bb.out;
+}
+
+template Sum(len) {
+    signal input in[len];
+    signal output out;
+
+    var lin_constraint = 0;
+    for (var i = 0; i < len; i += 1){
+        lin_constraint += in[i]; // accumulate sum
+    }
+
+    out <== lin_constraint;
+}
+
+/*
+    @brief:
+        computes the Miura metric of the two given inputs a,b and outputs the result
+        as dividend and divisor, assuming booleanity of the input
+        !WARNING!: The booleanity has the be ascertained outside of this template.
+    @detail: The inputs are of size len.
+*/
+template Miura_dividend_divisor_binary(len) {
+    signal input a[len];
+    signal input b[len];
+    signal output dividend;
+    signal output divisor;
+
+    component ab = InnerProduct(len);
+
+    ab.in1 <== a;
+    ab.in2 <== b;
+
+    component aa = Sum(len);
+    aa.in <== a;
+
+    component bb = Sum(len);
+    bb.in <== b;
+
+    dividend <== ab.out;
+    divisor <== aa.out + bb.out;
 }
 
 /*

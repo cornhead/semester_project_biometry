@@ -24,7 +24,7 @@ template MainComponent(len) {
     ComModel.r <== r_model;
     C_model <== ComModel.out;
 
-    component M = Miura_dividend_divisor(len);
+    component M = Miura_dividend_divisor_binary(len);
     M.a <== probe;
     M.b <== model;
     miura_dividend <== M.dividend;
