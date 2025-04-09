@@ -31,7 +31,7 @@ compile: ${DIR}/main.r1cs
 ${DIR}/main.r1cs: main.circom
 	mkdir -p ${DIR}
 	head -n -1 main.circom > .tmp.main_${N}.circom
-	@echo "component main  = MainComponent(${N});" >> .tmp.main_${N}.circom
+	@echo "component main {public [prng_stream]} = MainComponent(${N});" >> .tmp.main_${N}.circom
 	circom --r1cs --wasm --sym -o ${DIR} ${CFLAGS} .tmp.main_${N}.circom
 	rm .tmp.main_${N}.circom
 	mv ${DIR}/.tmp.main_${N}.r1cs ${DIR}/main.r1cs
