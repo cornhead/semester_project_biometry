@@ -26,3 +26,8 @@ input_files:
     path: "benchmark3_fewer_hashes.csv"
     column: "P time"
     marker: "^"
+
+  - description: "Optimization 4"
+    path: "benchmark5_sum_instead_of_inner_products.csv"
+    column: "P time"
+    marker: "s"
