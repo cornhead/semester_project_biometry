@@ -132,13 +132,13 @@ async function test(file_path){
 
         // Sample random field elements for commitments
         var r_model = Math.floor(Math.random() * max_r);
-        var r_probe = Math.floor(Math.random() * max_r);
+        // var r_probe = Math.floor(Math.random() * max_r);
 
         var input_json = {
             "model": testcase.model,
             "probe": testcase.probe,
             "r_model": r_model,
-            "r_probe" : r_probe
+            // "r_probe" : r_probe
         };
 
         // Generate Witness + Proof (aka full proof)
