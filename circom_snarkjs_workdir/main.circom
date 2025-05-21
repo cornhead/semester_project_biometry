@@ -26,6 +26,8 @@ template MainComponent(len) {
 
     signal output ntt_model[len];
     signal output ntt_probe[len];
+    signal output intt_model[len];
+    signal output intt_probe[len];
 
     for (var i = 0; i < len; i += 1){
         probe[i] * (1-probe[i]) === 0; // enforce binarity
@@ -53,6 +55,9 @@ template MainComponent(len) {
 
     signal nth_root <== nth_root_var;
 
+    signal nth_root_inverse <-- 1/nth_root;
+    nth_root_inverse * nth_root === 1;
+
     /* signal root_intermediate[power+1]; */
     /* root_intermediate[0] <== GENERATOR_FOR_SUBFIELD; */
     /* for (var i = 1; i <= power; i += 1){ */
@@ -70,6 +75,15 @@ template MainComponent(len) {
     ntt_m.in <== model;
     ntt_model <== ntt_m.out;
 
+    component intt_p = iNTT(len);
+    intt_p.nth_root_inverse <== nth_root_inverse;
+    intt_p.in <== ntt_probe;
+    intt_probe <== intt_p.out;
+
+    component intt_m = iNTT(len);
+    intt_m.nth_root_inverse <== nth_root_inverse;
+    intt_m.in <== ntt_model;
+    intt_model <== intt_m.out;
 }
 
 component main  = MainComponent(16);

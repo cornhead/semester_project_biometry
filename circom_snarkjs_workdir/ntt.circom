@@ -37,3 +37,18 @@ template NTT(len) {
 
     }
 }
+
+template iNTT(len) {
+    signal input in[len];
+    signal input nth_root_inverse; // inverse primitive n-th root of unity where n=len
+    signal output out[len];
+
+    component ntt = NTT(len);
+    ntt.in <== in;
+    ntt.nth_root <== nth_root_inverse;
+    
+    for (var i = 0; i < len; i += 1){
+        out[i] <-- ntt.out[i] / len;
+        ntt.out[i] === out[i] * len;
+    }
+}
