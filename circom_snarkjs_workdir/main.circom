@@ -15,6 +15,37 @@ function bitlength(num){
     return bits;
 }
 
+template ZeroExtend(n, m){
+    signal input in[n];
+    signal output out[m];
+
+    for (var i = 0; i < n; i += 1){
+        out[i] <== in[i];
+    }
+
+    for (var i = 0; i < m-n; i += 1){
+        out[n+i] <== 0;
+    }
+}
+
+
+template NTTextended(n, m){
+    signal input in[n];
+    signal input nth_root;
+    signal output out[m];
+
+    component ext = ZeroExtend(n, m);
+    ext.in <== in;
+
+    signal in_ext[m] <==  ext.out;
+
+    component ntt = NTT(m);
+    ntt.in <== in_ext;
+    ntt.nth_root <== nth_root;
+    
+    out <== ntt.out;
+}
+
 template MainComponent(len) {
     signal input probe[len];
     signal input model[len];
@@ -24,10 +55,12 @@ template MainComponent(len) {
     signal output miura_dividend;
     signal output miura_divisor;
 
-    signal output ntt_model[len];
-    signal output ntt_probe[len];
-    signal output intt_model[len];
-    signal output intt_probe[len];
+    signal output conv[2*len];
+
+    /* signal output ntt_model[len]; */
+    /* signal output ntt_probe[len]; */
+    /* signal output intt_model[len]; */
+    /* signal output intt_probe[len]; */
 
     for (var i = 0; i < len; i += 1){
         probe[i] * (1-probe[i]) === 0; // enforce binarity
@@ -65,25 +98,26 @@ template MainComponent(len) {
     /* } */
     /* signal nth_root <== root_intermediate[power]; // (primitive) n-th root of unity where n=len */
 
-    component ntt_p = NTT(len);
+
+    component ntt_p = NTTextended(len, 2*len);
     ntt_p.nth_root <== nth_root;
     ntt_p.in <== probe;
-    ntt_probe <== ntt_p.out;
+    signal ntt_probe[2*len] <== ntt_p.out;
 
-    component ntt_m = NTT(len);
+    component ntt_m = NTTextended(len, 2*len);
     ntt_m.nth_root <== nth_root;
     ntt_m.in <== model;
-    ntt_model <== ntt_m.out;
+    signal ntt_model[2*len] <== ntt_m.out;
 
-    component intt_p = iNTT(len);
-    intt_p.nth_root_inverse <== nth_root_inverse;
-    intt_p.in <== ntt_probe;
-    intt_probe <== intt_p.out;
+    signal ntt_conv[2*len];
+    for (var i = 0; i < 2*len; i += 1){
+        ntt_conv[i] <== ntt_probe[i] * ntt_model[i];
+    }
 
-    component intt_m = iNTT(len);
-    intt_m.nth_root_inverse <== nth_root_inverse;
-    intt_m.in <== ntt_model;
-    intt_model <== intt_m.out;
+    component intt_conv = iNTT(2*len);
+    intt_conv.nth_root_inverse <== nth_root_inverse;
+    intt_conv.in <== ntt_conv;
+    conv <== intt_conv.out;
 }
 
 component main  = MainComponent(16);
