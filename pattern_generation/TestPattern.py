@@ -1,5 +1,6 @@
 import random
 import json
+import numpy as np
 
 from operator import mul
 
@@ -25,6 +26,8 @@ class TestPattern:
         self.probes = [ TestPattern._generate_bit_vector(n, (i+1)/(m+1)) for i in range(m) ]
 
         self.miura = [ TestPattern._miura(self.model, probe) for probe in self.probes]
+        self.convolutions = [ np.convolve(self.model, p) for p in self.probes]
+        self.convolutions = [ [int(x) for x in c] + [0] for c in self.convolutions] # need to convert to int and append zero to match length of output of circuit
 
     def _generate_bit_vector(n:int, p:float) -> list[int]:
         '''

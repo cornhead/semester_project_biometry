@@ -91,11 +91,13 @@ async function extract_testcase_from_testpattern(mypattern, i){
     var model = mypattern.model;
     var probe = mypattern.probes[i];
     var miura = mypattern.miura[i];
+    var convolution = mypattern.convolutions[i];
 
     return {
         "model" : model,
         "probe" : probe,
-        "miura" : miura
+        "miura" : miura,
+        "convolution" : convolution
     };
 }
 
@@ -144,13 +146,16 @@ async function test(file_path){
         // Generate Witness + Proof (aka full proof)
 
         var resP = await prove_internal(input_json);
+        var ps = resP.public_signals;
         prover_times.push(resP.prover_time);
 
         // Extract public values from circuit output
 
-        var num = resP.public_signals[2];
-        var den = resP.public_signals[3];
+        var num = ps[1];
+        var den = ps[2];
         var miura = num/den;
+
+        var convolution = resP.public_signals.slice(3); 
 
         // Check if computed Miura score matched expected value
 
@@ -162,6 +167,30 @@ async function test(file_path){
             console.log("\tExpected ", testcase.miura, ", got ", num, "/", den, "=", miura);
 
             continue;
+        }
+
+        // Check that convolution is correct
+        
+        if (convolution.length != testcase.convolution.length){
+            testcases_failed += 1;
+
+            console.log(chalk.red("Testcase Failed: "));
+            console.log("\tTest case ", (i+1), "/", len, " failed because the length of the convolution did not match the expected length.");
+            console.log("\tExpected ", testcase.convolution.length, ", got ", convolution.length);
+
+            continue;
+        }
+
+        for (var i = 0; i < convolution.length; i += 1){
+            if (convolution[i] != testcase.convolution[i]){
+                testcases_failed += 1;
+
+                console.log(chalk.red("Testcase Failed: "));
+                console.log("\tTest case ", (i+1), "/", len, " failed because the convolution is incorrect at index ", i, ".");
+                console.log("\tExpected ", testcase.convolution[i], ", got ", convolution[i]);
+
+                continue;
+            }
         }
 
 
