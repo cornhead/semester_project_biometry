@@ -26,8 +26,18 @@ class TestPattern:
         self.probes = [ TestPattern._generate_bit_vector(n, (i+1)/(m+1)) for i in range(m) ]
 
         self.miura = [ TestPattern._miura(self.model, probe) for probe in self.probes]
-        self.convolutions = [ np.convolve(self.model, p) for p in self.probes]
+        self.convolutions = [ np.convolve(self.model[::-1], p) for p in self.probes] # convolve with reversed model
         self.convolutions = [ [int(x) for x in c] + [0] for c in self.convolutions] # need to convert to int and append zero to match length of output of circuit
+
+        # test that the convolution actually matches the inner products:
+        for p,c in zip(self.probes, self.convolutions):
+            # print("probe:", p)
+            # print("model:", self.model)
+            # print("conv: ", c)
+            for i in range(len(c)):
+                inner_product = sum([ p[j+i-n+1]*self.model[j] for j in range(len(p)) if j+i-n+1>=0 and j+i-n+1<n])
+                # print(inner_product)
+                assert inner_product == c[i]
 
     def _generate_bit_vector(n:int, p:float) -> list[int]:
         '''

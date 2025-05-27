@@ -15,6 +15,21 @@ function bitlength(num){
     return bits;
 }
 
+/*
+@brief: Takes a vector of length `n` and returns the same vector in reverse order
+*/
+template Reverse(n){
+    signal input in[n];
+    signal output out[n];
+
+    for (var i = 0; i < n; i += 1){
+        out[i] <== in[n-1-i];
+    }
+}
+
+/*
+@brief: Takes a vector of length `n` and adds zeros at the end to pad it to length `m`.
+*/
 template ZeroExtend(n, m){
     signal input in[n];
     signal output out[m];
@@ -29,6 +44,9 @@ template ZeroExtend(n, m){
 }
 
 
+/*
+@brief: takes a vector of length `n`, extends it to length `m` and performs the NTT on it.
+*/
 template NTTextended(n, m){
     signal input in[n];
     signal input nth_root;
@@ -91,22 +109,17 @@ template MainComponent(len) {
     signal nth_root_inverse <-- 1/nth_root;
     nth_root_inverse * nth_root === 1;
 
-    /* signal root_intermediate[power+1]; */
-    /* root_intermediate[0] <== GENERATOR_FOR_SUBFIELD; */
-    /* for (var i = 1; i <= power; i += 1){ */
-    /*     root_intermediate[i] <== root_intermediate[i-1]*root_intermediate[i-1]; */
-    /* } */
-    /* signal nth_root <== root_intermediate[power]; // (primitive) n-th root of unity where n=len */
-
-
     component ntt_p = NTTextended(len, 2*len);
     ntt_p.nth_root <== nth_root;
     ntt_p.in <== probe;
     signal ntt_probe[2*len] <== ntt_p.out;
 
+    component rev = Reverse(len);
+    rev.in <== model;
+
     component ntt_m = NTTextended(len, 2*len);
     ntt_m.nth_root <== nth_root;
-    ntt_m.in <== model;
+    ntt_m.in <== rev.out;
     signal ntt_model[2*len] <== ntt_m.out;
 
     signal ntt_conv[2*len];
