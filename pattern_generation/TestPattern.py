@@ -17,6 +17,15 @@ class TestPattern:
     The individual `probes` are also Bernoulli distributed, but the a probability
     that gradually increases from 0 to 1.
 
+    The `miura` property is an array containing all the Miura scores between
+    the model and the (many) probes.
+
+    The `convolution` property contains the convolutions between the model and
+    the probes, where the order of the entries in the model are reversed.
+    Effectively, this gives us vectors containing the inner products between the
+    model and probes for all possible offsets. (See project report for detaisl).
+    This property is enforced with assertions.
+
     :param n: Length of the vectors
     :param m: Number of probes (i.e. test cases)
     '''

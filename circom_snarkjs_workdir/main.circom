@@ -89,13 +89,14 @@ template MainComponent(len) {
     ComModel.r <== r_model;
     C_model <== ComModel.out;
 
-    component M = Miura_dividend_divisor_binary(len);
-    M.a <== probe;
-    M.b <== model;
-    miura_dividend <== M.dividend;
-    miura_divisor <== M.divisor;
+    /* component M = Miura_dividend_divisor_binary(len); */
+    /* M.a <== probe; */
+    /* M.b <== model; */
+    /* miura_dividend <== M.dividend; */
+    /* miura_divisor <== M.divisor; */
 
     // -----------------
+
     var FIELD_P = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
     assert ((FIELD_P-1) % (2**28) == 0);
     var GENERATOR = 5; // Found with sagemath: F=GF(FIELD_P); g = F.multiplicative_generator();
