@@ -1,0 +1,22 @@
+{
+  "name": "veinsnark",
+  "version": "1.0.0",
+  "description": "A SNARK for proving matching finger vein patterns over committed data",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Konrad Klier",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "jsdoc": "^4.0.4",
+    "node-persist": "^4.0.4",
+    "snarkjs": "^0.7.5",
+    "seedrandom": "^3.0.5"
+  },
+  "bin": {
+    "mastermind": "./index.js"
+  },
+  "type": "module"
+}

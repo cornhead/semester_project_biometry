@@ -178,6 +178,7 @@ cython_debug/
 *.r1cs
 *.wasm
 *.json
+!node_app/package.json
 *.zkey
 *.sym
 **/main_c*/*
