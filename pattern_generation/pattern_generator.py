@@ -89,6 +89,8 @@ def parse_cli_args(argv:list[str]) -> tuple[str, tuple]:
 if __name__ == '__main__':
     (command, args) = parse_cli_args(sys.argv)
 
+    stdout = sys.stdout
+
     match command:
         case "usage":
             usage()
@@ -97,10 +99,12 @@ if __name__ == '__main__':
             sys.exit(1)
         case "test_pattern":
             testcase = TestPattern(*args)
-            print(testcase)
+            stdout.write(str(testcase))
+            stdout.write('\n')
         case "random_input":
             myinput = CircuitInput(args)
-            print(myinput)
+            stdout.write(str(myinput))
+            stdout.write('\n')
 
         case _:
             print(
