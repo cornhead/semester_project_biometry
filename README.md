@@ -4,6 +4,4 @@ As part of my semester project, I implement a zkSNARK for biometric finger vein 
 
 To ensure compatibility with across platforms and no need for homebrew installations, we use a Dockerfile written by [Saleel](https://github.com/saleel/circom-docker/).
 
-
-docker build -t circom_snarkjs:1.0.0 .
-docker-compose run circom_snarkjs
+Find further details in the report.
