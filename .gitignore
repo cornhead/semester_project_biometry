@@ -179,13 +179,12 @@ cython_debug/
 *.wasm
 *.json
 !node_app/package.json
+**/powersOfTau*
 *.zkey
 *.sym
 **/main_c*/*
 **/main_js/*
-**/powersOfTau*
 **/verification_key.json
-**/patterns1.sjon
 **/node_modules/*
 **/.node-persist/*
 **.tmp.*

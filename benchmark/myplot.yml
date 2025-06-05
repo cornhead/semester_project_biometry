@@ -31,3 +31,8 @@ input_files:
     path: "benchmark5_sum_instead_of_inner_products.csv"
     column: "P time"
     marker: "s"
+
+  - description: "Optimization 5"
+    path: "benchmark6_no_commit_probe.csv"
+    column: "P time"
+    marker: "p"
