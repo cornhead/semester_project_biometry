@@ -1,9 +1,5 @@
 #! /usr/bin/env node
 
-/*
- * @author Konrad Klier <konrad.klier@epfl.ch>
- */
-
 // needed because app is of type 'module' 
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);

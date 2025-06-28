@@ -13,8 +13,6 @@ sys.path.insert(0, os.path.abspath("../../"))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Semester Project Benchmarking'
-copyright = '2025, Konrad Klier <konrad.klier@epfl.ch>'
-author = 'Konrad Klier <konrad.klier@epfl.ch>'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

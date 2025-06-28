@@ -1,7 +1,5 @@
 '''
 A generator for test patterns and random circuit input for the semester project on biometric finger vein recognition
-
-:moduleauthor: Konrad Klier <konrad.klier@epfl.ch>
 '''
 
 import sys

@@ -27,5 +27,3 @@ Usage: pattern_generator.py <command> [args...]
 
     Write a random input to a file:
     `pattern_generator.py random_input 16 > input.json`
-
-Author: Konrad Klier <konrad.klier@epfl.ch>, Feb 2025
